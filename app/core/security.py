@@ -1,10 +1,10 @@
 from datetime import datetime, timezone, timedelta
 from jose import JWTError, jwt
+from app.core import settings
 
-# Придумай секретный ключ, можно сгенерировать через os.urandom или просто временно захардкодить
-SECRET_KEY = "mysecretkey"  # лучше потом вынести в .env
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SECRET_KEY = settings.jwt_secret_key 
+ALGORITHM = settings.jwt_algorithm
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):

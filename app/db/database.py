@@ -1,10 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from app.core import settings
 
-DATABASE_URL = (
-    "postgresql+psycopg2://derfal:mysecretpassword@localhost:5432/taskmanager_api"
-)
+DATABASE_URL = settings.driver_database_url()
 
 
 engine = create_engine(DATABASE_URL)

@@ -1,9 +1,8 @@
-# models/tag.py
 from sqlalchemy import Column, Integer, String, Table, ForeignKey
 from sqlalchemy.orm import relationship
 from app.db.database import Base
 
-# Таблица-связка
+
 task_tags = Table(
     "task_tags",
     Base.metadata,
@@ -20,3 +19,5 @@ class Tag(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
     user = relationship("User", backref="tags")
+
+from app.models.user import User

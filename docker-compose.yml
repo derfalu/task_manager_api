@@ -1,0 +1,69 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    container_name: taskmanager-db
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "54320:5432"
+    volumes:
+      - ./storage/database:/var/lib/postgresql/data
+
+  web:
+    build: .
+    container_name: taskmanager-api
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+
+  redis:
+    container_name: taskmanager-redis
+    image: redis:7.4.4-alpine3.21
+    ports:
+      - "63790:6379"
+
+  celery_worker:
+    build: .
+    container_name: taskmanager-celery-worker
+    command: celery -A app.core.celery.celery_worker.celery_app worker --loglevel=info
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+
+  celery_beat:
+    build: .
+    container_name: taskmanager-celery-beat
+    command: celery -A app.core.celery.celery_worker.celery_app beat --loglevel=info
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL}

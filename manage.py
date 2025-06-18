@@ -31,6 +31,6 @@ def run_server():
 
 if __name__ == "__main__":
     drop_all()
-    generate_migration()
+    # generate_migration()
     run_migrations()
     run_server()

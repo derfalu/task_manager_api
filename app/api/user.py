@@ -26,6 +26,6 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     return {"access_token": token, "token_type": "bearer"}
 
 
-@router.get("/me", response_model=UserRead)
+@router.get("/profile", response_model=UserRead, summary="Получить информацию о текущем пользователе")
 def read_current_user(current_user: User = Depends(get_current_user)):
     return current_user
