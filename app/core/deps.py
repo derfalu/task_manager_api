@@ -5,7 +5,7 @@ from app.db.deps import get_db
 from app.services.user_service import get_user_by_username
 from app.models.user import User
 from app.core.security import verify_token
-from jose import JWTError
+from app.core.exceptiosn import credentials_exception, user_not_found_exception
 
 http_bearer = HTTPBearer()
 
@@ -18,14 +18,10 @@ def get_current_user(
 
     payload = verify_token(token)
     if not payload or "sub" not in payload:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Не удалось подтвердить учетные данные",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise credentials_exception()
 
     username = payload["sub"]
     user = get_user_by_username(db, username)
     if user is None:
-        raise HTTPException(status_code=401, detail="Пользователь не найден")
+        raise user_not_found_exception()
     return user

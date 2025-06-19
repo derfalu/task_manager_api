@@ -1,4 +1,3 @@
-version: "3.9"
 
 services:
   db:
@@ -15,30 +14,61 @@ services:
       - "54320:5432"
     volumes:
       - ./storage/database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.4.4-alpine3.21
+    container_name: taskmanager-redis
+    ports:
+      - "6380:6379"
+
+  migrations:
+    build: .
+    container_name: taskmanager-migrations
+    command: bash -c "alembic upgrade head"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+
+  seeds:
+    build: .
+    container_name: taskmanager-seeds
+    command: python app/db/seeder.py
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+    env_file:
+      - .env
+
 
   web:
     build: .
     container_name: taskmanager-api
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
       - .:/code
     ports:
       - "8000:8000"
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      migrations:
+        condition: service_completed_successfully
     env_file:
       - .env
     environment:
       DATABASE_URL: ${DATABASE_URL}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
-
-  redis:
-    container_name: taskmanager-redis
-    image: redis:7.4.4-alpine3.21
-    ports:
-      - "63790:6379"
 
   celery_worker:
     build: .
@@ -47,8 +77,12 @@ services:
     volumes:
       - .:/code
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      migrations:
+        condition: service_completed_successfully
     env_file:
       - .env
     environment:
@@ -61,8 +95,12 @@ services:
     volumes:
       - .:/code
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      migrations:
+        condition: service_completed_successfully
     env_file:
       - .env
     environment:

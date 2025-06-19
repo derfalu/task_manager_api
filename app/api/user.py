@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.schemas.user import UserCreate, UserRead, Token, UserLogin
 from app.services.user_service import create_user, authenticate_user
@@ -26,6 +26,10 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     return {"access_token": token, "token_type": "bearer"}
 
 
-@router.get("/profile", response_model=UserRead, summary="Получить информацию о текущем пользователе")
+@router.get(
+    "/profile",
+    response_model=UserRead,
+    summary="Получить информацию о текущем пользователе",
+)
 def read_current_user(current_user: User = Depends(get_current_user)):
     return current_user

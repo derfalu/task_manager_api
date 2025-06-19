@@ -1,4 +1,9 @@
 venv/
 storage/
 
+__pycache__/
+*.py[cod]
+
+celerybeat-schedule
+
 .env

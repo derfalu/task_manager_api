@@ -1,6 +1,9 @@
 from datetime import datetime, timezone, timedelta
 from jose import JWTError, jwt
 from app.core import settings
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 SECRET_KEY = settings.jwt_secret_key 
 ALGORITHM = settings.jwt_algorithm
@@ -23,3 +26,4 @@ def verify_token(token: str):
         return payload
     except JWTError:
         return None
+
