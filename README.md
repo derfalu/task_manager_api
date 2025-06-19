@@ -49,5 +49,23 @@
 
 ```bash
 git clone https://github.com/your-username/task-manager-api.git
+```
+
+### 2. Перейдите в директорию проекта 
+
+```bash
 cd task-manager-api
-make start 
+```
+
+### 3. Запустите приложение по команде
+
+```bash
+make start
+```
+
+### 4. С остальными командами можно ознакомиться 
+
+```bash
+make help
+```
+
