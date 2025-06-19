@@ -7,10 +7,22 @@ from app.services import task_service
 from app.models.user import User
 from datetime import datetime
 
-router = APIRouter(prefix="/tasks", tags=["Tasks"])
+router = APIRouter(prefix="/tasks", tags=["Задачи 🎯"])
 
 
-@router.post("/", response_model=TaskRead)
+@router.post(
+    "/",
+    response_model=TaskRead,
+    summary="Создать задачу",
+    description="""
+Создает новую задачу с возможностью указать:
+- название
+- описание
+- статус (`new`, `in_progress`, `done`)
+- срок выполнения
+- список тегов по названию (если они не существуют, то создаются)
+""",
+)
 def create_task(
     task_in: TaskCreate,
     db: Session = Depends(get_db),
@@ -19,7 +31,20 @@ def create_task(
     return task_service.create_task(db, user, task_in)
 
 
-@router.get("/", response_model=list[TaskRead])
+@router.get(
+    "/",
+    response_model=list[TaskRead],
+    summary="Получить список задач",
+    description="""
+Возвращает список задач текущего пользователя.
+
+Фильтры:
+- статус задачи (`new`, `in_progress`, `done`)
+- дата выполнения (от и до)
+- по конкретному тегу (`tag_id`)
+- сортировка по сроку выполнения
+""",
+)
 def read_tasks(
     status: StatusEnum | None = Query(default=None),
     due_from: datetime | None = Query(default=None),
@@ -40,7 +65,12 @@ def read_tasks(
     )
 
 
-@router.get("/{task_id}", response_model=TaskRead)
+@router.get(
+    "/{task_id}",
+    response_model=TaskRead,
+    summary="Получить задачу по ID",
+    description="Возвращает задачу по её ID, если она принадлежит текущему пользователю",
+)
 def read_task(
     task_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)
 ):
@@ -50,7 +80,12 @@ def read_task(
     return task
 
 
-@router.patch("/{task_id}", response_model=TaskRead)
+@router.patch(
+    "/{task_id}",
+    response_model=TaskRead,
+    summary="Обновить задачу",
+    description="Позволяет обновить любую часть задачи: заголовок, описание, статус, срок или теги",
+)
 def update_task(
     task_id: int,
     task_in: TaskUpdate,
@@ -59,7 +94,13 @@ def update_task(
 ):
     return task_service.update_task(db, user, task_id, task_in)
 
-@router.delete("/{task_id}", status_code=204)
+
+@router.delete(
+    "/{task_id}",
+    status_code=204,
+    summary="Удалить задачу",
+    description="Удаляет задачу по ID, если она принадлежит текущему пользователю",
+)
 def delete_task(
     task_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)
 ):

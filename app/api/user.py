@@ -7,16 +7,35 @@ from app.db.deps import get_db
 from app.core.deps import get_current_user
 from app.models.user import User
 
+router = APIRouter(prefix="/users", tags=["Пользователь 👤"])
 
-router = APIRouter(prefix="/users", tags=["Users"])
 
+@router.post(
+    "/register",
+    response_model=UserRead,
+    summary="Регистрация пользователя",
+    description="""
+Регистрирует нового пользователя в системе.
 
-@router.post("/register", response_model=UserRead)
+- Требует уникальные `username` и `email`
+- Возвращает данные созданного пользователя
+""",
+)
 def register(user: UserCreate, db: Session = Depends(get_db)):
     return create_user(db, user)
 
 
-@router.post("/login", response_model=Token)
+@router.post(
+    "/login",
+    response_model=Token,
+    summary="Аутентификация пользователя",
+    description="""
+Аутентифицирует пользователя по имени и паролю.
+
+- Возвращает JWT-токен при успешной аутентификации
+- В случае ошибки — 401 Unauthorized
+""",
+)
 def login(user: UserLogin, db: Session = Depends(get_db)):
     user_in_db = authenticate_user(db, user.username, user.password)
     if not user_in_db:
@@ -29,7 +48,12 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
 @router.get(
     "/profile",
     response_model=UserRead,
-    summary="Получить информацию о текущем пользователе",
+    summary="Получить текущего пользователя",
+    description="""
+Возвращает данные текущего авторизованного пользователя.
+
+- Требуется авторизация через Bearer-токен
+""",
 )
 def read_current_user(current_user: User = Depends(get_current_user)):
     return current_user

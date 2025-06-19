@@ -3,10 +3,18 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from app.core import settings
 
-DATABASE_URL = settings.driver_database_url()
+# URL подключения к базе данных, формируется через настройки приложения
+DATABASE_URL = settings.driver_database_url
 
-
+# Создание движка SQLAlchemy
 engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+# Создание фабрики сессий для работы с БД
+SessionLocal = sessionmaker(
+    autocommit=False,  # Требует явного вызова commit()
+    autoflush=False,  # Отключает автоматический flush перед запросами
+    bind=engine,  # Привязываем к текущему движку
+)
+
+# Базовый класс для всех моделей SQLAlchemy
 Base = declarative_base()

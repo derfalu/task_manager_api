@@ -1,8 +1,16 @@
 venv/
 storage/
 
+# Python cache
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyd
+
+# Alembic cache 
+alembic/versions/__pycache__/
+*.pyc
+
 
 celerybeat-schedule
 
