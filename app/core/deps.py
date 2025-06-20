@@ -6,9 +6,19 @@ from app.services.user_service import get_user_by_username
 from app.models.user import User
 from app.core.security import verify_token
 from app.core.exceptions import credentials_exception, user_not_found_exception
+from fastapi import Request, HTTPException
+
 
 # Зависимость FastAPI для получения Bearer-токена из заголовков Authorization
-http_bearer = HTTPBearer()
+class CustomHTTPBearer(HTTPBearer):
+    async def __call__(self, request: Request) -> HTTPAuthorizationCredentials:
+        try:
+            return await super().__call__(request)
+        except HTTPException:
+            raise credentials_exception()
+
+
+http_bearer = CustomHTTPBearer()
 
 
 def get_current_user(

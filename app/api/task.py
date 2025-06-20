@@ -39,6 +39,7 @@ def create_task(
 Возвращает список задач текущего пользователя.
 
 Фильтры:
+- поиск по заголовку
 - статус задачи (`new`, `in_progress`, `done`)
 - дата выполнения (от и до)
 - по конкретному тегу (`tag_id`)
@@ -46,6 +47,7 @@ def create_task(
 """,
 )
 def read_tasks(
+    title_query: str | None = Query(default=None, description="Поиск по заголовку"),
     status: StatusEnum | None = Query(default=None),
     due_from: datetime | None = Query(default=None),
     due_to: datetime | None = Query(default=None),
@@ -62,6 +64,7 @@ def read_tasks(
         due_to=due_to,
         tag_id=tag_id,
         sort_by_due_date=sort_by_due_date,
+        title_query=title_query,
     )
 
 

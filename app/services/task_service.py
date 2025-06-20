@@ -51,6 +51,7 @@ def get_user_tasks(
     due_to: Optional[datetime] = None,
     tag_id: Optional[int] = None,
     sort_by_due_date: bool = False,
+    title_query: Optional[str] = None,
 ):
     """
     Получает список задач пользователя с возможностью фильтрации.
@@ -60,11 +61,15 @@ def get_user_tasks(
     - диапазону срока выполнения
     - тегу
     - сортировка по дате выполнения
+    - поиск по заголовку
 
     :return: Список задач
     """
     query = db.query(Task).filter(Task.user_id == user.id)
 
+    if title_query:
+        query = query.filter(Task.title.ilike(f"%{title_query}%"))
+        
     if status:
         query = query.filter(Task.status == status)
 
@@ -76,7 +81,7 @@ def get_user_tasks(
 
     if tag_id:
         query = query.join(Task.tags).filter(Tag.id == tag_id)
-
+        
     if sort_by_due_date:
         query = query.order_by(Task.due_date.asc())
 
